@@ -1,0 +1,30 @@
+pkgname=systemd-healthcheck
+pkgver=0
+pkgrel=0
+pkgdesc='Command-based systemd readiness and watchdog supervisor'
+arch=('x86_64' 'aarch64')
+url='https://github.com/soupglasses/systemd_healthcheck'
+license=('BSD-3-Clause')
+makedepends=('go>=1.23')
+source=("systemd_healthcheck-$pkgver.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  cd "systemd_healthcheck-$pkgver"
+  export CGO_ENABLED=0
+  go build -buildvcs=false -mod=readonly -trimpath \
+    -ldflags "-s -w -X main.version=$pkgver" \
+    -o sd-healthcheck ./cmd/sd-healthcheck
+}
+
+check() {
+  cd "systemd_healthcheck-$pkgver"
+  go test -buildvcs=false -mod=readonly ./...
+}
+
+package() {
+  cd "systemd_healthcheck-$pkgver"
+  install -Dpm0755 sd-healthcheck "$pkgdir/usr/bin/sd-healthcheck"
+  install -Dpm0644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dpm0644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+}

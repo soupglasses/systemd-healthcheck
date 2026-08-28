@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+
+export CGO_ENABLED := 0
+VERSION := $(shell dpkg-parsechangelog -SVersion | sed 's/-[^-]*$$//')
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	go build -buildvcs=false -mod=readonly -trimpath \
+		-ldflags "-s -w -X main.version=$(VERSION)" \
+		-o sd-healthcheck ./cmd/sd-healthcheck
+
+override_dh_auto_test:
+	go test -buildvcs=false -mod=readonly ./...
+
+override_dh_auto_install:
+	install -Dpm0755 sd-healthcheck \
+		$(CURDIR)/debian/systemd-healthcheck/usr/bin/sd-healthcheck
+
+override_dh_auto_clean:
+	rm -f sd-healthcheck

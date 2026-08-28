@@ -1,0 +1,16 @@
+Source: systemd-healthcheck
+Section: admin
+Priority: optional
+Maintainer: Sofie Finnes <sofie+git@finnes.dev>
+Build-Depends: debhelper-compat (= 13), golang-any (>= 2:1.23~)
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+Homepage: https://github.com/soupglasses/systemd_healthcheck
+
+Package: systemd-healthcheck
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: command-based systemd readiness and watchdog supervisor
+ sd-healthcheck wraps a service process and turns a container-style
+ health-check command into systemd readiness and watchdog notifications. It
+ implements the notification protocol directly and does not use libsystemd.

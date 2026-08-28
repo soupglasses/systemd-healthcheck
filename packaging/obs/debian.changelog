@@ -1,0 +1,5 @@
+systemd-healthcheck (0-0) unstable; urgency=medium
+
+  * Initial release.
+
+ -- Sofie Finnes <sofie+git@finnes.dev>  Fri, 28 Aug 2026 12:20:10 +0200
