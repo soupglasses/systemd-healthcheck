@@ -50,7 +50,7 @@ available.
 
 ## Service unit
 
-```systemd
+```ini
 [Unit]
 Description=Example HTTP service
 After=network.target
@@ -86,7 +86,7 @@ leading `--` is accepted for people who prefer the visual boundary.
 Containers managed by Podman already have this facility through Quadlet. Use
 Podman's health check directly instead of wrapping the container:
 
-```systemd
+```ini
 [Container]
 Image=example/image
 Notify=healthy
@@ -108,7 +108,7 @@ See the [Podman Quadlet documentation][quadlet-health].
 packages. A package can ship a dedicated check in `/usr/libexec` and wrap its
 ordinary daemon without adding container machinery:
 
-```systemd
+```ini
 [Service]
 Environment="SD_HEALTHCHECK_CMD=/usr/libexec/example-healthcheck"
 ExecStart=/usr/bin/sd-healthcheck /usr/sbin/example-daemon
