@@ -3,16 +3,16 @@ version: '1.1'
 pull_requests:
   steps:
     - branch_package:
-        source_project: home:soupglasses:systemd_healthcheck
+        source_project: home:soupglasses:systemd-healthcheck
         source_package: systemd-healthcheck
-        target_project: home:soupglasses:systemd_healthcheck
+        target_project: home:soupglasses:systemd-healthcheck
   filters:
     event: pull_request
 
 tagged_releases:
   steps:
     - trigger_services:
-        project: home:soupglasses:systemd_healthcheck
+        project: home:soupglasses:systemd-healthcheck
         package: systemd-healthcheck
   filters:
     event: tag_push

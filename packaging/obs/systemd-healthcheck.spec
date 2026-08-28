@@ -7,9 +7,9 @@ URL:            https://github.com/soupglasses/systemd_healthcheck
 Source0:        systemd_healthcheck-%{version}.tar.xz
 
 %if 0%{?suse_version}
-BuildRequires:  golang(API) >= 1.23
+BuildRequires:  golang(API) >= 1.22
 %else
-BuildRequires:  golang >= 1.23
+BuildRequires:  golang >= 1.22
 %endif
 
 %description

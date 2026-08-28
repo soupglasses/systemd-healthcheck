@@ -5,7 +5,7 @@ pkgdesc='Command-based systemd readiness and watchdog supervisor'
 arch=('x86_64' 'aarch64')
 url='https://github.com/soupglasses/systemd_healthcheck'
 license=('BSD-3-Clause')
-makedepends=('go>=1.23')
+makedepends=('go>=1.22')
 source=("systemd_healthcheck-$pkgver.tar.xz")
 sha256sums=('SKIP')
 

@@ -1,5 +1,8 @@
 # sd-healthcheck
 
+[![CI](https://github.com/soupglasses/systemd_healthcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/soupglasses/systemd_healthcheck/actions/workflows/ci.yml)
+[![OBS build](https://build.opensuse.org/projects/home:soupglasses:systemd-healthcheck/packages/systemd-healthcheck/badge.svg?type=default)](https://build.opensuse.org/package/show/home:soupglasses:systemd-healthcheck/systemd-healthcheck)
+
 `sd-healthcheck` makes a container-style health-check command usable as a
 systemd readiness and watchdog source. It is a small foreground supervisor
 written in Go with no third-party packages.
@@ -110,7 +113,7 @@ process in the unit's control group.
 
 ## Build and test
 
-Go 1.23 or newer is required.
+Go 1.22 or newer is required.
 
 ```console
 go build -trimpath -o sd-healthcheck ./cmd/sd-healthcheck

@@ -1,9 +1,9 @@
 # Open Build Service packaging
 
 These files form the `systemd-healthcheck` package in
-`home:soupglasses:systemd_healthcheck` for openSUSE, Fedora, RHEL, Debian,
-Ubuntu, and Arch Linux targets. Copy the directory contents, including
-`_service`, to that OBS package's working copy.
+`home:soupglasses:systemd-healthcheck/systemd-healthcheck` for openSUSE,
+Fedora, RHEL, Debian, Ubuntu, and Arch Linux targets. Copy the directory
+contents, including `_service`, to that OBS package's working copy.
 
 Releases use `vMAJOR.MINOR.PATCH` Git tags. The source service deliberately
 checks out `@PARENT_TAG@`, so commits after the latest tag are never packaged.
@@ -18,7 +18,7 @@ distribution and architecture back to the tagged GitHub commit.
 For a manual release update without the webhook:
 
 ```console
-osc service remoterun home:soupglasses:systemd_healthcheck systemd-healthcheck
+osc service remoterun home:soupglasses:systemd-healthcheck systemd-healthcheck
 ```
 
 The source services update every build recipe to the same tag version. The RPM
