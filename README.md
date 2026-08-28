@@ -23,6 +23,9 @@ Packages are built and published by the openSUSE Build Service for:
 | openSUSE Tumbleweed | Rolling | `i586`, `x86_64`, `aarch64` |
 | openSUSE Leap | 16.0 | `x86_64`, `aarch64` |
 | Fedora | 43, 44 | `x86_64`, `aarch64` |
+| AlmaLinux | 9, 10 | `x86_64`, `aarch64` |
+| Rocky Linux | 9, 10 | `x86_64` |
+| CentOS Stream | 9, 10 | `x86_64`, `aarch64` |
 | Debian | 13 | `x86_64`, `aarch64` |
 | Ubuntu | 24.04 LTS, 26.04 LTS | `x86_64`, `aarch64` |
 | Arch Linux | Rolling | `x86_64` |
