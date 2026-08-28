@@ -1,7 +1,7 @@
 # sd-healthcheck
 
 [![CI](https://github.com/soupglasses/systemd_healthcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/soupglasses/systemd_healthcheck/actions/workflows/ci.yml)
-[![OBS build](https://build.opensuse.org/projects/home:soupglasses:systemd-healthcheck/packages/systemd-healthcheck/badge.svg?type=default)](https://build.opensuse.org/package/show/home:soupglasses:systemd-healthcheck/systemd-healthcheck)
+[![OBS build](https://build.opensuse.org/projects/home:soupglasses:systemd-healthcheck/packages/systemd-healthcheck/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:soupglasses:systemd-healthcheck/systemd-healthcheck)
 
 `sd-healthcheck` makes a container-style health-check command usable as a
 systemd readiness and watchdog source. It is a small foreground supervisor
@@ -10,6 +10,23 @@ written in Go with no third-party packages.
 The health check is deliberately protocol-agnostic. Use `curl` for HTTP,
 `grpc_health_probe` for gRPC, `nc` for TCP, or a service-specific executable.
 An exit status of zero means healthy; any other result means unhealthy.
+
+## Installation
+
+**[Download packages for your distribution][package-downloads]**
+
+Packages are built and published by the openSUSE Build Service for:
+
+| Distribution | Releases | Architectures |
+| --- | --- | --- |
+| openSUSE Tumbleweed | Rolling | `i586`, `x86_64`, `aarch64` |
+| openSUSE Leap | 16.0 | `x86_64`, `aarch64` |
+| Fedora | 43, 44 | `x86_64`, `aarch64` |
+| Debian | 13 | `x86_64`, `aarch64` |
+| Ubuntu | 24.04 LTS, 26.04 LTS | `x86_64`, `aarch64` |
+| Arch Linux | Rolling | `x86_64` |
+
+[package-downloads]: https://software.opensuse.org/download.html?project=home%3Asoupglasses%3Asystemd-healthcheck&package=systemd-healthcheck
 
 ## Service unit
 
