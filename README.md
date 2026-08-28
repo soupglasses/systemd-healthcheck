@@ -26,7 +26,7 @@ Packages are built and published by the openSUSE Build Service for:
 | AlmaLinux | 9, 10 | `x86_64`, `aarch64` |
 | Rocky Linux | 9, 10 | `x86_64` |
 | CentOS Stream | 9, 10 | `x86_64`, `aarch64` |
-| Debian | 13 | `x86_64`, `aarch64` |
+| Debian | 12, 13 | `x86_64`, `aarch64` |
 | Ubuntu | 24.04 LTS, 26.04 LTS | `x86_64`, `aarch64` |
 | Arch Linux | Rolling | `x86_64` |
 
