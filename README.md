@@ -26,6 +26,21 @@ Packages are built and published by the openSUSE Build Service for:
 | Ubuntu | 24.04 LTS, 26.04 LTS | `x86_64`, `aarch64` |
 | Arch Linux | Rolling | `x86_64` |
 
+### Manual installation with Go
+
+If your distribution is not listed, Go 1.22 or newer can build and install the
+current release:
+
+```console
+CGO_ENABLED=0 go install -trimpath -ldflags="-X main.version=1.0.0" \
+  github.com/soupglasses/systemd_healthcheck/cmd/sd-healthcheck@v1.0.0
+```
+
+This is a fallback and is not recommended for managed systems. It installs
+only the binary into `GOBIN` or `GOPATH/bin`; it does not provide a signed
+distribution package, automatic package-manager updates, or package-manager
+ownership. Prefer the interactive download when a package is available.
+
 [package-downloads]: https://software.opensuse.org/download.html?project=home%3Asoupglasses%3Asystemd-healthcheck&package=systemd-healthcheck
 
 ## Service unit
