@@ -13,7 +13,7 @@ An exit status of zero means healthy; any other result means unhealthy.
 
 ## Installation
 
-**[Download packages for your distribution][package-downloads]**
+**[Interactive download for your distribution][package-downloads]**
 
 Packages are built and published by the openSUSE Build Service for:
 
