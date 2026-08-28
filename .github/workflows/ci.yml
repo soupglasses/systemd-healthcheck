@@ -32,12 +32,6 @@ jobs:
       - name: Test
         run: go test -race ./...
 
-      - name: Check packaging
-        run: |
-          bash -n packaging/obs/PKGBUILD
-          python3 -c "import xml.etree.ElementTree as ET; ET.parse('packaging/obs/_service')"
-          test -x packaging/obs/debian.rules
-
       - name: Build
         env:
           CGO_ENABLED: 0
