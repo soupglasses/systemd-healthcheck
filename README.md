@@ -64,7 +64,7 @@ TimeoutStartSec=2min
 Restart=on-failure
 
 Environment="SD_HEALTHCHECK_CMD=/usr/bin/curl --fail --silent --show-error --max-time 2 http://127.0.0.1:3000/healthz"
-ExecStart=/usr/local/bin/sd-healthcheck /usr/local/bin/example-server --port 3000
+ExecStart=/usr/bin/sd-healthcheck /usr/local/bin/example-server --port 3000
 
 [Install]
 WantedBy=multi-user.target
@@ -81,40 +81,16 @@ or a systemd credential.
 always the service executable and no `--` separator is needed. An optional
 leading `--` is accepted for people who prefer the visual boundary.
 
-## Podman and packaged services
+## Packaged services
 
-Containers managed by Podman already have this facility through Quadlet. Use
-Podman's health check directly instead of wrapping the container:
-
-```ini
-[Container]
-Image=example/image
-Notify=healthy
-HealthCmd=/usr/local/bin/healthcheck
-HealthInterval=10s
-HealthTimeout=3s
-HealthRetries=3
-HealthOnFailure=kill
-
-[Service]
-Restart=on-failure
-```
-
-`Notify=healthy` delays service readiness until the container is healthy, and
-`HealthOnFailure=kill` lets systemd's restart policy handle runtime failure.
-See the [Podman Quadlet documentation][quadlet-health].
-
-`sd-healthcheck` provides the equivalent command-based option for native
-packages. A package can ship a dedicated check in `/usr/libexec` and wrap its
-ordinary daemon without adding container machinery:
+A package can ship a dedicated check in `/usr/libexec` and wrap its ordinary
+daemon with `sd-healthcheck`:
 
 ```ini
 [Service]
 Environment="SD_HEALTHCHECK_CMD=/usr/libexec/example-healthcheck"
 ExecStart=/usr/bin/sd-healthcheck /usr/sbin/example-daemon
 ```
-
-[quadlet-health]: https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html#healthonfailure
 
 ## Behavior
 
