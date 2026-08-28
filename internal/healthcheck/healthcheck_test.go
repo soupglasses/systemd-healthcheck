@@ -130,6 +130,24 @@ func TestRunRejectsWatchdogBelowMinimum(t *testing.T) {
 	}
 }
 
+func TestRunRejectsSocketActivationBeforeStartingService(t *testing.T) {
+	t.Setenv("SD_HEALTHCHECK_CMD", "true")
+	t.Setenv("NOTIFY_SOCKET", "/unused/notify.sock")
+	t.Setenv("WATCHDOG_USEC", "1000000")
+	t.Setenv("WATCHDOG_PID", strconv.Itoa(os.Getpid()))
+	t.Setenv("LISTEN_FDS", "1")
+	t.Setenv("LISTEN_PID", strconv.Itoa(os.Getpid()))
+	marker := filepath.Join(t.TempDir(), "started")
+
+	err := Run([]string{"/usr/bin/touch", marker}, os.Getenv, io.Discard, io.Discard, "test")
+	if err == nil || !strings.Contains(err.Error(), "socket activation is not supported") {
+		t.Fatalf("Run() error = %v, want explicit socket-activation error", err)
+	}
+	if _, err := os.Stat(marker); !errors.Is(err, os.ErrNotExist) {
+		t.Fatal("service was started")
+	}
+}
+
 func TestSupervisorPreservesChildExitCode(t *testing.T) {
 	cfg := testSupervisorConfig()
 	cfg.command = []string{"/bin/sh", "-c", "exit 42"}
@@ -177,12 +195,50 @@ func TestChildEnvironmentDoesNotExposeNotifyProtocol(t *testing.T) {
 		"NOTIFY_SOCKET=/run/systemd/notify",
 		"WATCHDOG_USEC=30000000",
 		"WATCHDOG_PID=123",
+		"LISTEN_FDS=1",
+		"LISTEN_PID=123",
+		"LISTEN_PIDFDID=456",
+		"LISTEN_FDNAMES=listener",
+		"LISTEN_ADDRESS=127.0.0.1",
 		"SD_HEALTHCHECK_CMD=true",
 		"APPLICATION_SETTING=yes",
 	})
-	want := []string{"PATH=/usr/bin", "APPLICATION_SETTING=yes"}
+	want := []string{"PATH=/usr/bin", "LISTEN_ADDRESS=127.0.0.1", "APPLICATION_SETTING=yes"}
 	if !slices.Equal(got, want) {
 		t.Fatalf("childEnvironment() = %#v, want %#v", got, want)
+	}
+}
+
+func TestSocketActivationRejectsDescriptorsForCurrentProcess(t *testing.T) {
+	environment := map[string]string{
+		"LISTEN_FDS":     "2",
+		"LISTEN_PID":     "123",
+		"LISTEN_FDNAMES": "http:https",
+	}
+	err := rejectSocketActivation(func(name string) string { return environment[name] }, 123)
+	if err == nil || !strings.Contains(err.Error(), "use the service's native systemd watchdog handler") {
+		t.Fatalf("rejectSocketActivation() error = %v, want native-watchdog guidance", err)
+	}
+}
+
+func TestSocketActivationIgnoresDescriptorsForAnotherProcess(t *testing.T) {
+	environment := map[string]string{"LISTEN_FDS": "1", "LISTEN_PID": "456"}
+	err := rejectSocketActivation(func(name string) string { return environment[name] }, 123)
+	if err != nil {
+		t.Fatalf("rejectSocketActivation() error = %v, want metadata for another process ignored", err)
+	}
+}
+
+func TestSocketActivationRejectsInvalidMetadata(t *testing.T) {
+	for _, environment := range []map[string]string{
+		{"LISTEN_FDS": "invalid", "LISTEN_PID": "123"},
+		{"LISTEN_FDS": "-1", "LISTEN_PID": "123"},
+		{"LISTEN_FDS": "1"},
+		{"LISTEN_FDS": "1", "LISTEN_PID": "invalid"},
+	} {
+		if err := rejectSocketActivation(func(name string) string { return environment[name] }, 123); err == nil {
+			t.Fatalf("rejectSocketActivation(%#v) error = nil", environment)
+		}
 	}
 }
 

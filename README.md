@@ -5,7 +5,8 @@
 
 `sd-healthcheck` makes a container-style health-check command usable as a
 systemd readiness and watchdog source. It is a small foreground supervisor
-written in Go with no third-party packages.
+written in Go with no third-party packages. It is meant for services that have
+a health check but do not support systemd's watchdog.
 
 The health check is deliberately protocol-agnostic. Use `curl` for HTTP,
 `grpc_health_probe` for gRPC, `nc` for TCP, or a service-specific executable.
@@ -124,6 +125,10 @@ stop signal to the wrapper, which forwards it to the service process group. If
 shutdown times out, systemd still sends the final kill signal to every remaining
 process in the unit's control group.
 
+Socket-activated services are outside the wrapper's scope. If systemd supplies
+descriptors through `LISTEN_FDS`, the wrapper exits before starting the service
+and directs the operator to use the service's native systemd watchdog handler.
+
 ## Build and test
 
 Go 1.22 or newer is required.
@@ -135,8 +140,9 @@ go vet ./...
 ```
 
 The tests exercise the shell health check, supervisor lifecycle, watchdog
-notification behavior, filesystem and Linux abstract Unix datagram sockets,
-and an end-to-end wrapper run with a real notification socket.
+notification behavior, socket-activation rejection, filesystem and Linux
+abstract Unix datagram sockets, and an end-to-end wrapper run with a real
+notification socket.
 
 ## Acknowledgements
 

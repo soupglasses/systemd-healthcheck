@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -30,6 +31,9 @@ func Run(args []string, getenv func(string) string, stdout, stderr io.Writer, ve
 	}
 	timing, err := newSchedule(cfg.Watchdog)
 	if err != nil {
+		return err
+	}
+	if err := rejectSocketActivation(getenv, os.Getpid()); err != nil {
 		return err
 	}
 
@@ -280,14 +284,41 @@ func ExitCode(err error) int {
 	return 1
 }
 
-// childEnvironment makes the wrapper the sole owner of systemd notifications.
-// A wrapped service with native watchdog support must not compete with it.
+func rejectSocketActivation(getenv func(string) string, pid int) error {
+	value := getenv("LISTEN_FDS")
+	if value == "" {
+		return nil
+	}
+	fdCount, err := strconv.Atoi(value)
+	if err != nil || fdCount < 0 {
+		return fmt.Errorf("invalid LISTEN_FDS %q", value)
+	}
+	if fdCount == 0 {
+		return nil
+	}
+
+	listenPID := getenv("LISTEN_PID")
+	parsedPID, err := strconv.Atoi(listenPID)
+	if err != nil || parsedPID <= 0 {
+		return fmt.Errorf("invalid LISTEN_PID %q", listenPID)
+	}
+	if parsedPID != pid {
+		return nil
+	}
+	return fmt.Errorf("socket activation is not supported (LISTEN_FDS=%d); use the service's native systemd watchdog handler", fdCount)
+}
+
+// childEnvironment makes the wrapper the sole owner of systemd notifications
+// and prevents unsupported socket-activation metadata from leaking into child
+// processes.
 func childEnvironment(environment []string) []string {
 	result := make([]string, 0, len(environment))
 	for _, item := range environment {
 		name, _, _ := strings.Cut(item, "=")
 		switch {
-		case name == "NOTIFY_SOCKET", name == "WATCHDOG_USEC", name == "WATCHDOG_PID", strings.HasPrefix(name, "SD_HEALTHCHECK_"):
+		case name == "NOTIFY_SOCKET", name == "WATCHDOG_USEC", name == "WATCHDOG_PID",
+			name == "LISTEN_FDS", name == "LISTEN_PID", name == "LISTEN_PIDFDID", name == "LISTEN_FDNAMES",
+			strings.HasPrefix(name, "SD_HEALTHCHECK_"):
 			continue
 		default:
 			result = append(result, item)
