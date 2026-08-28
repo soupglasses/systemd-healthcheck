@@ -31,15 +31,20 @@ Packages are built and published by the openSUSE Build Service for:
 If your distribution is not listed, Go 1.22 or newer can build and install the
 current release:
 
-```console
-CGO_ENABLED=0 go install -trimpath -ldflags="-X main.version=1.0.0" \
-  github.com/soupglasses/systemd_healthcheck/cmd/sd-healthcheck@v1.0.0
+```bash
+export VERSION=1.0.0
+export GOBIN="${GOBIN:-$(go env GOPATH)/bin}"
+
+CGO_ENABLED=0 go install -trimpath -ldflags="-X main.version=${VERSION}" \
+  "github.com/soupglasses/systemd_healthcheck/cmd/sd-healthcheck@v${VERSION}"
+sudo install -Dm0755 "${GOBIN}/sd-healthcheck" \
+  /usr/local/bin/sd-healthcheck
 ```
 
-This is a fallback and is not recommended for managed systems. It installs
-only the binary into `GOBIN` or `GOPATH/bin`; it does not provide a signed
-distribution package, automatic package-manager updates, or package-manager
-ownership. Prefer the interactive download when a package is available.
+This is a fallback and is not recommended for managed systems. It does not
+provide a signed distribution package, automatic package-manager updates, or
+package-manager ownership. Prefer the interactive download when a package is
+available.
 
 [package-downloads]: https://software.opensuse.org/download.html?project=home%3Asoupglasses%3Asystemd-healthcheck&package=systemd-healthcheck
 
@@ -147,7 +152,7 @@ process in the unit's control group.
 
 Go 1.22 or newer is required.
 
-```console
+```bash
 go build -trimpath -o sd-healthcheck ./cmd/sd-healthcheck
 go test -race ./...
 go vet ./...
