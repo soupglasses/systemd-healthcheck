@@ -1,0 +1,232 @@
+.Dd September 1, 2026
+.Dt SD-HEALTHCHECK 1
+.Os
+.
+.Sh NAME
+.Nm sd-healthcheck
+.Nd translate a command health check into systemd readiness and watchdog notifications
+.
+.Sh SYNOPSIS
+.Nm
+.Op Fl -
+.Ar command
+.Op Ar argument ...
+.Nm
+.Fl h
+.Nm
+.Fl -help
+.Nm
+.Fl -version
+.
+.Sh DESCRIPTION
+.Nm
+starts a service as a child process and runs a separate, container-style
+health-check command.
+The first successful check completes systemd service startup by sending
+.Dq READY=1 .
+Later successful checks keep the systemd service watchdog alive by sending
+.Dq WATCHDOG=1 .
+.
+.Pp
+The service command is taken from the command-line arguments.
+Health-check and systemd notification settings are read exclusively from the
+environment.
+Consequently, a
+.Dq --
+separator is not required, but an optional leading separator is accepted.
+.
+.Pp
+The service unit must normally set
+.Dq Type=notify
+and
+.Dq WatchdogSec= .
+The health check uses
+.Pa /bin/sh
+.Fl c ,
+matching the shell form of Docker's
+.Ic HEALTHCHECK CMD .
+An exit status of zero means healthy; any other result means unhealthy.
+.
+.Sh OPTIONS
+.Bl -tag -width Ds
+.It Fl h , Fl -help
+Print usage information and exit.
+.It Fl -version
+Print the program version and exit.
+.It Fl -
+End option processing.
+When present, this separator must precede the service command.
+.El
+.
+.Sh ENVIRONMENT
+.Bl -tag -width Ds
+.It Ev SD_HEALTHCHECK_CMD
+Required shell command used to check the service.
+The command is run using
+.Pa /bin/sh
+.Fl c .
+Do not include secrets directly in this value; have the command read them from
+a protected file or a systemd credential instead.
+.It Ev NOTIFY_SOCKET
+Required systemd notification socket, normally provided to a service using
+.Dq Type=notify .
+.It Ev WATCHDOG_USEC
+Required watchdog timeout in microseconds, normally provided by
+.Dq WatchdogSec= .
+The value determines the probe interval, timeout, and retry interval.
+.It Ev WATCHDOG_PID
+Required process ID for the watchdog owner, normally provided by
+.Dq WatchdogSec= .
+It must identify the
+.Nm
+process.
+.El
+.
+.Pp
+.Nm
+owns the systemd notification protocol.
+It removes
+.Ev NOTIFY_SOCKET ,
+.Ev WATCHDOG_USEC ,
+.Ev WATCHDOG_PID ,
+all variables beginning with
+.Ev SD_HEALTHCHECK_ ,
+and systemd socket-activation variables from both the service and health-check
+environments.
+.
+.Sh OPERATION
+.Bl -enum
+.It
+The service is started in a new process group and the health check is run
+immediately.
+.It
+Before the first successful check, failures are retried every one tenth of the
+watchdog timeout.
+The service remains in its systemd starting state, so
+.Dq TimeoutStartSec=
+controls the maximum startup time.
+.It
+The first successful check sends
+.Dq READY=1 ,
+.Dq WATCHDOG=1 ,
+and a healthy status in one notification.
+.It
+After startup, checks normally run every half of the watchdog timeout.
+Each check may run for at most one quarter of the watchdog timeout.
+.It
+A successful check sends a watchdog keep-alive notification.
+A failed check reports an unhealthy status, withholds the watchdog keep-alive,
+and retries after one tenth of the watchdog timeout.
+If health does not recover, systemd applies its configured watchdog action.
+.El
+.
+.Pp
+There is no independent failure threshold or restart policy.
+.Dq TimeoutStartSec= ,
+.Dq WatchdogSec= ,
+and
+.Dq Restart=
+in the service unit remain the sources of truth.
+Watchdog timeouts below 100 milliseconds are rejected.
+.
+.Pp
+Health-check standard output and standard error are streamed to the
+corresponding
+.Nm
+streams.
+Successful checks should normally remain quiet to avoid unnecessary journal
+traffic.
+.
+.Sh CHECK DESIGN
+The configured command serves two purposes: its first success declares service
+startup complete, and a sustained later failure permits systemd to terminate or
+restart the service.
+The check should therefore test a condition for which both actions are safe.
+.
+.Pp
+In particular, avoid treating temporary overload or failure of a remote
+dependency as proof that the local service must be restarted.
+Such checks can cause restart cascades.
+If runtime traffic readiness must be withdrawn without restarting the service,
+implement that check in the load balancer or service-discovery layer;
+systemd's
+.Dq READY=1
+notification is a one-time startup transition.
+.
+.Sh SIGNALS
+.Nm
+forwards
+.Dv SIGTERM ,
+.Dv SIGINT ,
+.Dv SIGQUIT ,
+and
+.Dv SIGABRT
+to the service process group and waits for it to exit.
+.Dv SIGHUP ,
+.Dv SIGUSR1 ,
+and
+.Dv SIGUSR2
+are passed through while supervision continues.
+.
+.Pp
+Using
+.Dq KillMode=mixed
+is recommended.
+It lets systemd signal
+.Nm
+first so it can forward the stop signal, while still allowing systemd to kill
+all remaining processes in the unit if shutdown times out.
+.
+.Sh EXIT STATUS
+.Nm
+exits with status zero when the service exits successfully or a coordinated
+systemd stop completes.
+A non-zero service exit status is preserved.
+If the service terminates from an uncoordinated signal, the status is 128 plus
+the signal number.
+Configuration, startup, and notification errors produce status 1.
+Health-check failures do not directly terminate
+.Nm ;
+they are handled through the systemd startup timeout or service watchdog.
+.
+.Sh LIMITATIONS
+Socket-activated services are not supported.
+If systemd supplies descriptors through
+.Ev LISTEN_FDS ,
+.Nm
+exits before starting the service.
+Use the service's native systemd watchdog integration instead.
+.
+.Pp
+Runtime readiness cannot be withdrawn after
+.Dq READY=1
+has been sent.
+The status reported by
+.Nm
+after startup is health information, not a Kubernetes-style traffic-routing
+signal.
+.
+.Sh EXAMPLES
+Run an HTTP service with a command health check:
+.
+.Bd -literal -offset indent
+[Service]
+Type=notify
+NotifyAccess=main
+KillMode=mixed
+WatchdogSec=30s
+TimeoutStartSec=2min
+Restart=on-failure
+
+Environment="SD_HEALTHCHECK_CMD=/usr/bin/curl --fail --silent --show-error --max-time 2 http://127.0.0.1:3000/healthz"
+ExecStart=/usr/bin/sd-healthcheck /usr/local/bin/example-server --port 3000
+.Ed
+.
+.Sh SEE ALSO
+.Xr sd_notify 3 ,
+.Xr systemd.kill 5 ,
+.Xr systemd.service 5
+.
+.Sh AUTHORS
+The project source and issue tracker are available on
+.Lk https://github.com/soupglasses/systemd-healthcheck GitHub .
