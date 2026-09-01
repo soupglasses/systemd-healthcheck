@@ -13,8 +13,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/soupglasses/systemd_healthcheck/internal/cli"
-	"github.com/soupglasses/systemd_healthcheck/internal/sdnotify"
+	"github.com/soupglasses/systemd-healthcheck/internal/cli"
+	"github.com/soupglasses/systemd-healthcheck/internal/sdnotify"
 )
 
 func Run(args []string, getenv func(string) string, stdout, stderr io.Writer, version string) error {

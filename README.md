@@ -1,6 +1,6 @@
 # sd-healthcheck
 
-[![CI](https://github.com/soupglasses/systemd_healthcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/soupglasses/systemd_healthcheck/actions/workflows/ci.yml)
+[![CI](https://github.com/soupglasses/systemd-healthcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/soupglasses/systemd-healthcheck/actions/workflows/ci.yml)
 [![OBS build](https://build.opensuse.org/projects/home:soupglasses:systemd-healthcheck/packages/systemd-healthcheck/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:soupglasses:systemd-healthcheck/systemd-healthcheck)
 
 `sd-healthcheck` makes a container-style health-check command usable as a
@@ -40,7 +40,7 @@ export VERSION=1.0.0
 export GOBIN="${GOBIN:-$(go env GOPATH)/bin}"
 
 CGO_ENABLED=0 go install -trimpath -ldflags="-X main.version=${VERSION}" \
-  "github.com/soupglasses/systemd_healthcheck/cmd/sd-healthcheck@v${VERSION}"
+  "github.com/soupglasses/systemd-healthcheck/cmd/sd-healthcheck@v${VERSION}"
 sudo install -Dm0755 "${GOBIN}/sd-healthcheck" \
   /usr/local/bin/sd-healthcheck
 ```
@@ -141,6 +141,9 @@ go build -trimpath -o sd-healthcheck ./cmd/sd-healthcheck
 go test -race ./...
 go vet ./...
 ```
+
+The manual page source is available at `docs/sd-healthcheck.1`. Preview it
+locally with `man ./docs/sd-healthcheck.1`.
 
 The tests exercise the shell health check, supervisor lifecycle, watchdog
 notification behavior, socket-activation rejection, filesystem and Linux

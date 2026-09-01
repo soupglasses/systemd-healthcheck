@@ -1,3 +1,3 @@
-module github.com/soupglasses/systemd_healthcheck
+module github.com/soupglasses/systemd-healthcheck
 
 go 1.22

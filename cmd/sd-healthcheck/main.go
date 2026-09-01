@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/soupglasses/systemd_healthcheck/internal/healthcheck"
+	"github.com/soupglasses/systemd-healthcheck/internal/healthcheck"
 )
 
 var version = "dev"
