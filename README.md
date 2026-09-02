@@ -36,7 +36,7 @@ If your distribution is not listed, Go 1.22 or newer can build and install the
 current release:
 
 ```bash
-export VERSION=1.0.0
+export VERSION=1.1.0
 export GOBIN="${GOBIN:-$(go env GOPATH)/bin}"
 
 CGO_ENABLED=0 go install -trimpath -ldflags="-X main.version=${VERSION}" \
