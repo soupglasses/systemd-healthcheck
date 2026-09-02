@@ -39,7 +39,7 @@ current release:
 export VERSION=1.1.0
 export GOBIN="${GOBIN:-$(go env GOPATH)/bin}"
 
-CGO_ENABLED=0 go install -trimpath -ldflags="-X main.version=${VERSION}" \
+CGO_ENABLED=0 go install -trimpath -ldflags="-s -w -X main.version=${VERSION}" \
   "github.com/soupglasses/systemd-healthcheck/cmd/sd-healthcheck@v${VERSION}"
 sudo install -Dm0755 "${GOBIN}/sd-healthcheck" \
   /usr/local/bin/sd-healthcheck
