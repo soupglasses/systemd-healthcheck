@@ -50,6 +50,10 @@ provide a signed distribution package, automatic package-manager updates, or
 package-manager ownership. Prefer the interactive download when a package is
 available.
 
+The command deliberately disables CGO, producing a self-contained static
+binary for portable manual installation. Distribution packages instead use the
+platform linker so they can apply the distribution's normal hardening.
+
 [package-downloads]: https://software.opensuse.org/download.html?project=home%3Asoupglasses%3Asystemd-healthcheck&package=systemd-healthcheck
 
 ## Service unit
